@@ -1,0 +1,79 @@
+#include <iostream>
+#include <string>
+
+std::string generate_vigenere_table() {
+    std::string alphabet = "abcdefghijklmnopqrstuvwxyz";
+    std::string vigenere_table;
+
+    for (int i = 0; i < 26; i++) {
+        std::string shifted_alphabet = alphabet.substr(i) + alphabet.substr(0, i);
+        vigenere_table += shifted_alphabet;
+    }
+
+    return vigenere_table;
+}
+
+std::string caesar_cipher_encrypt(const std::string& plaintext, int shift) {
+    std::string encrypted_text;
+
+    for (char c : plaintext) {
+        if (std::isalpha(c)) {
+            if (std::islower(c)) {
+                char encrypted_char = (c - 'a' + shift) % 26 + 'a';
+                encrypted_text += encrypted_char;
+            } else {
+                char encrypted_char = (c - 'A' + shift) % 26 + 'A';
+                encrypted_text += encrypted_char;
+            }
+        } else {
+            encrypted_text += c;
+        }
+    }
+
+    return encrypted_text;
+}
+
+std::string vigenere_cipher_encrypt(const std::string& plaintext, const std::string& keyword) {
+    std::string encrypted_text;
+    std::string vigenere_table = generate_vigenere_table();
+    int keyword_length = keyword.length();
+    int keyword_index = 0;
+
+    for (char c : plaintext) {
+        if (std::isalpha(c)) {
+            if (std::islower(c)) {
+                char encrypted_char = vigenere_table[c - 'a'][keyword[keyword_index % keyword_length] - 'a'];
+                encrypted_text += encrypted_char;
+            } else {
+                char encrypted_char = std::toupper(vigenere_table[std::tolower(c) - 'a'][keyword[keyword_index % keyword_length] - 'a']);
+                encrypted_text += encrypted_char;
+            }
+            keyword_index++;
+        } else {
+            encrypted_text += c;
+        }
+    }
+
+    return encrypted_text;
+}
+
+std::string encrypt_password(const std::string& username, const std::string& password) {
+    int caesar_shift = username.length() % 26;
+    std::string encrypted_password = caesar_cipher_encrypt(password, caesar_shift);
+    std::string vigenere_keyword = username;
+    std::transform(vigenere_keyword.begin(), vigenere_keyword.end(), vigenere_keyword.begin(), ::tolower);
+    encrypted_password = vigenere_cipher_encrypt(encrypted_password, vigenere_keyword);
+
+    return encrypted_password;
+}
+
+int main() {
+    std::string username = "Olzhas";
+    std::string password = "agai";
+
+    std::string encrypted_password = encrypt_password(username, password);
+
+    std::cout << "Зашифрованный пароль: " << encrypted_password << std::endl;
+
+    return 0;
+}
